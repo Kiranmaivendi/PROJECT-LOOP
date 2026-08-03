@@ -61,10 +61,13 @@ const startServer = () => {
   });
 };
 
-if (mongoUri.includes('127.0.0.1') || mongoUri.includes('localhost')) {
-  logger.warn('MongoDB URI points to localhost; continuing without a database connection for deployment readiness.');
-  startServer();
-} else {
+const isLocalMongo = mongoUri.includes('127.0.0.1') || mongoUri.includes('localhost');
+
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.MONGO_URI || isLocalMongo) {
+    logger.error('Production deploy requires a real MONGO_URI; localhost is not available on Render or Vercel.');
+    process.exit(1);
+  }
   mongoose.connect(mongoUri)
     .then(() => {
       logger.info('MongoDB connected');
@@ -72,6 +75,21 @@ if (mongoUri.includes('127.0.0.1') || mongoUri.includes('localhost')) {
     })
     .catch((error) => {
       logger.error('MongoDB connection failed', error);
-      startServer();
+      process.exit(1);
     });
+} else {
+  if (isLocalMongo) {
+    logger.warn('MongoDB URI points to localhost; continuing without a database connection for local development.');
+    startServer();
+  } else {
+    mongoose.connect(mongoUri)
+      .then(() => {
+        logger.info('MongoDB connected');
+        startServer();
+      })
+      .catch((error) => {
+        logger.error('MongoDB connection failed', error);
+        startServer();
+      });
+  }
 }
