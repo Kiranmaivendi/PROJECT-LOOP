@@ -1,0 +1,29 @@
+{
+  "info": {
+    "name": "Project LOOP API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/health",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"name\": \"Jane\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\"\n}"},
+        "url": {"raw": "http://localhost:5000/api/auth/register", "host": ["localhost"], "port": "5000", "path": ["api", "auth", "register"]}
+      }
+    }
+  ]
+}
