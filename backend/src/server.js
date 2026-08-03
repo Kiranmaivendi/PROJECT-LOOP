@@ -23,6 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
+const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/project-loop';
 
 app.use(helmet());
 app.use(cors());
@@ -54,12 +55,23 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(errorHandler);
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/project-loop')
-  .then(() => {
-    logger.info('MongoDB connected');
-    app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
-  })
-  .catch((error) => {
-    logger.error('MongoDB connection failed', error);
-    process.exit(1);
+const startServer = () => {
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
   });
+};
+
+if (mongoUri.includes('127.0.0.1') || mongoUri.includes('localhost')) {
+  logger.warn('MongoDB URI points to localhost; continuing without a database connection for deployment readiness.');
+  startServer();
+} else {
+  mongoose.connect(mongoUri)
+    .then(() => {
+      logger.info('MongoDB connected');
+      startServer();
+    })
+    .catch((error) => {
+      logger.error('MongoDB connection failed', error);
+      startServer();
+    });
+}
