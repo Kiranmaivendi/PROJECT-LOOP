@@ -14,3 +14,5 @@ services:
         value: project-loop-super-secret-key
       - key: OPENAI_API_KEY
         value: your_openai_api_key_here
+      - key: NODE_ENV
+        value: production
